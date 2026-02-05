@@ -1,4 +1,4 @@
-// pars.id - Coercion-Resistant Identity for the Persian Diaspora
+// pars.id - Coercion-Resistant Identity for the Global Parsi Community
 // Based on PIP-0003: Coercion Resistance Threat Model
 //
 // Security features:
