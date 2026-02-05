@@ -1,56 +1,112 @@
-import { useState, useRef, useEffect } from 'react'
-import { useAccount, useConnect, useDisconnect } from 'wagmi'
-import { User, LogOut, Wallet, ChevronDown } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { User, LogOut } from 'lucide-react'
 
-const HANZO_IAM_URL = 'https://iam.hanzo.ai'
-const PARS_APP_NAME = 'pars-id'
+const IAM_URL = 'https://iam.hanzo.ai'
+const APP_NAME = 'pars-id'
 
-function shortenAddress(address: string, chars = 4): string {
-  return `${address.slice(0, chars + 2)}...${address.slice(-chars)}`
+interface UserInfo {
+  id: string
+  name: string
+  displayName: string
+  avatar: string
 }
 
 export function WalletConnect() {
-  const { address, isConnected } = useAccount()
-  const { connect, connectors, isPending } = useConnect()
-  const { disconnect } = useDisconnect()
-  const [showDropdown, setShowDropdown] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const [user, setUser] = useState<UserInfo | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Close dropdown when clicking outside
+  // Check for existing session or OAuth callback
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false)
+    const checkAuth = async () => {
+      // Check for OAuth callback code
+      const params = new URLSearchParams(window.location.search)
+      const code = params.get('code')
+      const state = params.get('state')
+
+      if (code && state === 'pars') {
+        // Exchange code for token
+        try {
+          const res = await fetch(`${IAM_URL}/api/login/oauth/access_token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              grant_type: 'authorization_code',
+              client_id: APP_NAME,
+              code,
+              redirect_uri: window.location.origin,
+            }),
+          })
+
+          if (res.ok) {
+            const data = await res.json()
+            localStorage.setItem('access_token', data.access_token)
+            // Clean URL
+            window.history.replaceState({}, '', window.location.pathname)
+          }
+        } catch (e) {
+          console.error('Token exchange failed:', e)
+        }
       }
+
+      // Check for existing token
+      const token = localStorage.getItem('access_token')
+      if (token) {
+        try {
+          const res = await fetch(`${IAM_URL}/api/userinfo`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          if (res.ok) {
+            const userInfo = await res.json()
+            setUser(userInfo)
+          } else {
+            localStorage.removeItem('access_token')
+          }
+        } catch (e) {
+          console.error('Failed to get user info:', e)
+        }
+      }
+
+      setIsLoading(false)
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+
+    checkAuth()
   }, [])
 
-  // Handle wallet connection
-  const handleConnect = async (connector: (typeof connectors)[number]) => {
-    setShowDropdown(false)
-    try {
-      await connect({ connector })
-    } catch (error) {
-      console.error('Connection error:', error)
-    }
+  const handleLogin = () => {
+    const redirectUri = encodeURIComponent(window.location.origin)
+    window.location.href = `${IAM_URL}/login/oauth/authorize?client_id=${APP_NAME}&response_type=code&redirect_uri=${redirectUri}&scope=openid%20profile&state=pars`
   }
 
-  if (isConnected && address) {
+  const handleLogout = () => {
+    localStorage.removeItem('access_token')
+    setUser(null)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="px-4 py-2 bg-neutral-800 rounded-lg">
+        <span className="text-sm text-neutral-400">...</span>
+      </div>
+    )
+  }
+
+  if (user) {
     return (
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 bg-neutral-800/50 border border-neutral-700 rounded-lg px-3 py-2">
-          <User className="w-4 h-4 text-amber-400" />
-          <span className="text-sm font-medium">{shortenAddress(address)}</span>
+          {user.avatar ? (
+            <img src={user.avatar} alt="" className="w-5 h-5 rounded-full" />
+          ) : (
+            <User className="w-4 h-4 text-amber-400" />
+          )}
+          <span className="text-sm font-medium">
+            {user.displayName || user.name || user.id?.slice(0, 8)}
+          </span>
         </div>
         <button
-          onClick={() => {
-            disconnect()
-            localStorage.removeItem('hanzo_token')
-          }}
+          onClick={handleLogout}
           className="p-2 bg-neutral-800/50 border border-neutral-700 rounded-lg hover:bg-neutral-700 transition-colors"
-          title="Disconnect"
+          title="Sign out"
         >
           <LogOut className="w-4 h-4" />
         </button>
@@ -58,53 +114,12 @@ export function WalletConnect() {
     )
   }
 
-  // Filter to unique connectors by name
-  const uniqueConnectors = [...connectors].reduce((acc, connector) => {
-    const existing = acc.find(c => c.name === connector.name)
-    if (!existing) acc.push(connector)
-    return acc
-  }, [] as (typeof connectors)[number][])
-
   return (
-    <div className="relative" ref={dropdownRef}>
-      <button
-        onClick={() => setShowDropdown(!showDropdown)}
-        disabled={isPending}
-        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-semibold rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all disabled:opacity-50"
-      >
-        <Wallet className="w-4 h-4" />
-        {isPending ? 'Connecting...' : 'Connect Wallet'}
-        <ChevronDown className="w-4 h-4" />
-      </button>
-
-      {showDropdown && (
-        <div className="absolute right-0 mt-2 w-56 bg-neutral-900 border border-neutral-700 rounded-lg shadow-xl z-50">
-          <div className="p-2">
-            <div className="px-3 py-2 text-xs text-neutral-500 uppercase tracking-wider">
-              Select Wallet
-            </div>
-            {uniqueConnectors.map((connector) => (
-              <button
-                key={connector.uid}
-                onClick={() => handleConnect(connector)}
-                className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm hover:bg-neutral-800 rounded-md transition-colors"
-              >
-                <Wallet className="w-4 h-4 text-amber-400" />
-                {connector.name}
-              </button>
-            ))}
-            <div className="border-t border-neutral-700 mt-2 pt-2">
-              <a
-                href={`${HANZO_IAM_URL}/login/oauth/authorize?client_id=${PARS_APP_NAME}&response_type=code&redirect_uri=${encodeURIComponent(window.location.origin)}&scope=openid%20profile&state=pars`}
-                className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm hover:bg-neutral-800 rounded-md transition-colors"
-              >
-                <User className="w-4 h-4 text-blue-400" />
-                Sign in with Hanzo
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    <button
+      onClick={handleLogin}
+      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-semibold rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all"
+    >
+      Sign In
+    </button>
   )
 }
