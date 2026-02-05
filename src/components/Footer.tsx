@@ -13,7 +13,7 @@ export function Footer() {
               <span className="text-xl font-bold">pars.id</span>
             </div>
             <p className="text-sm text-neutral-400 max-w-md">
-              Coercion-resistant decentralized identity for the Persian diaspora.
+              Coercion-resistant decentralized identity for the global Parsi community.
               Anonymous, secure, unstoppable.
             </p>
             <p className="text-xs text-neutral-500 mt-4">

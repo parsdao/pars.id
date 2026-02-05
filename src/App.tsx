@@ -27,7 +27,7 @@ function App() {
                   Coercion-Resistant <span className="text-amber-400">Identity</span>
                 </h1>
                 <p className="text-neutral-400 max-w-2xl mx-auto text-lg">
-                  Anonymous, secure identity for the Persian diaspora.
+                  Anonymous, secure identity for the global Parsi community.
                   No KYC. No surveillance. No compromise.
                 </p>
               </div>
