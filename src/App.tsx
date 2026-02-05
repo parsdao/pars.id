@@ -4,7 +4,7 @@ import { config } from './lib/wagmi'
 import { Header } from './components/Header'
 import { Footer } from './components/Footer'
 import { ParsIdentityMint } from './components/ParsIdentityMint'
-import { Shield, Globe, Zap, Fingerprint } from 'lucide-react'
+import { Shield, Globe, Zap } from 'lucide-react'
 
 const queryClient = new QueryClient()
 
@@ -19,8 +19,12 @@ function App() {
             <div className="max-w-6xl mx-auto px-6">
               {/* Hero */}
               <div className="text-center mb-12">
+                <img
+                  src="/logo.png"
+                  alt="Pars Network"
+                  className="w-32 h-32 mx-auto mb-6"
+                />
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm mb-6">
-                  <Fingerprint size={16} />
                   <span>did:pars</span>
                 </div>
                 <h1 className="text-4xl lg:text-6xl font-bold tracking-tight mb-4">

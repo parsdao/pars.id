@@ -1,4 +1,4 @@
-import { Fingerprint, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -7,9 +7,11 @@ export function Footer() {
         <div className="grid md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500/20 to-amber-600/20 flex items-center justify-center">
-                <Fingerprint className="w-5 h-5 text-amber-400" />
-              </div>
+              <img
+                src="/logo.png"
+                alt="Pars Network"
+                className="w-10 h-10"
+              />
               <span className="text-xl font-bold">pars.id</span>
             </div>
             <p className="text-sm text-neutral-400 max-w-md">

@@ -1,4 +1,3 @@
-import { Fingerprint } from 'lucide-react';
 import { WalletConnect } from './WalletConnect';
 
 export function Header() {
@@ -7,9 +6,11 @@ export function Header() {
       <nav className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
           <a href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500/20 to-amber-600/20 flex items-center justify-center">
-              <Fingerprint className="w-5 h-5 text-amber-400" />
-            </div>
+            <img
+              src="/logo.png"
+              alt="Pars Network"
+              className="w-10 h-10"
+            />
             <div>
               <span className="text-xl font-bold text-white">pars.id</span>
               <span className="text-xs text-neutral-500 block">did:pars</span>
