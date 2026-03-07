@@ -57,7 +57,7 @@ function App() {
                     <Globe className="w-8 h-8 text-blue-400 mx-auto mb-4" />
                     <h3 className="font-medium mb-2">Cross-Chain</h3>
                     <p className="text-sm text-neutral-500">
-                      Resolve your DID across all MIGA ecosystem networks.
+                      Resolve your DID across all Pars ecosystem networks.
                       One identity, everywhere.
                     </p>
                   </div>

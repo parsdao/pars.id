@@ -53,11 +53,6 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="https://migaprotocol.xyz" className="hover:text-white transition-colors flex items-center gap-1">
-                  MIGA Protocol <ExternalLink size={12} />
-                </a>
-              </li>
-              <li>
                 <a href="https://hanzo.id" className="hover:text-white transition-colors flex items-center gap-1">
                   Hanzo ID <ExternalLink size={12} />
                 </a>
